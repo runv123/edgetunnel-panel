@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>EdgeTunnel Panel</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">E</span><div><b>EdgeTunnel</b><small>独立管理面板</small></div></div>
+      <nav id="nav" class="nav">
+        <button class="nav-item active" data-page="overview">▦　概览</button>
+        <button class="nav-item" data-page="config">⚙　核心配置</button>
+        <button class="nav-item" data-page="cloudflare">☁　Cloudflare 配置</button>
+        <button class="nav-item" data-page="telegram">✉　Telegram 通知</button>
+        <button class="nav-item" data-page="ips">⌁　自定义优选 IP</button>
+        <button class="nav-item" data-page="logs">≡　运行日志</button>
+        <button class="nav-item" data-page="tools">⌕　检测工具</button>
+      </nav>
+      <div class="side-bottom"><span class="status-dot"></span><span id="connectionLabel">尚未连接内核</span></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><div class="eyebrow">EDGETUNNEL / CONTROL CENTER</div><h1 id="pageTitle">概览</h1></div><div class="top-actions"><button id="refreshBtn" class="btn btn-quiet hidden">刷新数据</button><button id="logoutBtn" class="btn btn-quiet hidden">断开连接</button></div></header>
+      <section id="loginView" class="login-wrap">
+        <div class="login-card"><div class="login-icon">E</div><div class="eyebrow">INDEPENDENT PANEL</div><h2>连接你的 EdgeTunnel 内核</h2><p class="muted">面板与内核分开部署。请填写原内核网址及管理员密码。</p>
+          <label for="apiBase">内核网址</label><input id="apiBase" type="url" placeholder="https://your-worker.pages.dev" autocomplete="url">
+          <label for="adminPassword">管理员密码</label><input id="adminPassword" type="password" placeholder="输入 Cloudflare 环境变量中的管理密码" autocomplete="current-password">
+          <button id="connectBtn" class="btn btn-primary full">连接内核</button><p id="loginMessage" class="message" role="status"></p>
+          <div class="notice"><b>连接说明</b><br>独立域名需要内核允许来自面板域名的跨域 API 请求。若尚未配置内核桥接，连接会失败；不要因此关闭管理员验证。</div>
+        </div>
+      </section>
+      <section id="appView" class="hidden">
+        <div id="overviewPage" class="page">
+          <div class="welcome card"><div><div class="eyebrow">WELCOME BACK</div><h2>内核控制台</h2><p class="muted">管理界面已与代理内核分离，配置仍保存在原内核绑定的 KV 中。</p></div><div class="welcome-symbol">◈</div></div>
+          <div class="stats"><div class="stat card"><span>内核状态</span><strong id="statStatus">待检查</strong><small>API 连接状态</small></div><div class="stat card"><span>配置 UUID</span><strong id="statUUID">—</strong><small>仅展示部分字符</small></div><div class="stat card"><span>HOST</span><strong id="statHost">—</strong><small>当前配置</small></div><div class="stat card"><span>日志条目</span><strong id="statLogs">—</strong><small>KV 中的日志</small></div></div>
+          <div class="card"><div class="card-head"><div><h3>快捷操作</h3><p class="muted">常用配置入口</p></div></div><div class="quick-grid"><button data-go="config" class="quick"><span>⚙</span><b>编辑核心配置</b><small>UUID、HOST 等 JSON 配置</small></button><button data-go="cloudflare" class="quick"><span>☁</span><b>Cloudflare 配置</b><small>查看和保存 CF 设置</small></button><button data-go="logs" class="quick"><span>≡</span><b>查看运行日志</b><small>查看最近请求记录</small></button><button data-go="tools" class="quick"><span>⌕</span><b>检测代理</b><small>使用内核现有检测接口</small></button></div></div>
+        </div>
+        <div id="configPage" class="page hidden"><div class="card"><div class="card-head"><div><h3>核心配置</h3><p class="muted">读取和保存原内核的 admin/config.json。</p></div><div class="inline-actions"><button class="btn btn-quiet" id="loadConfigBtn">重新读取</button><button class="btn btn-primary" id="saveConfigBtn">保存配置</button></div></div><textarea id="configEditor" class="code-editor" spellcheck="false" placeholder="点击重新读取以加载配置 JSON"></textarea><p id="configMessage" class="message"></p><div class="warning">保存会直接修改原内核的配置。建议先复制备份 JSON，再进行修改。</div></div><div class="card"><div class="card-head"><div><h3>重置配置</h3><p class="muted">调用内核原有的 admin/init 接口。</p></div><button class="btn btn-danger" id="resetConfigBtn">重置为默认值</button></div><p class="muted">这是有影响的操作，请确认你确实需要重置。</p></div></div>
+        <div id="cloudflarePage" class="page hidden"><div class="card"><div class="card-head"><div><h3>Cloudflare 配置</h3><p class="muted">读取和保存 admin/cf.json。</p></div><div class="inline-actions"><button class="btn btn-quiet" id="loadCfBtn">重新读取</button><button class="btn btn-primary" id="saveCfBtn">保存配置</button></div></div><textarea id="cfEditor" class="code-editor" spellcheck="false" placeholder="点击重新读取以加载 CF 配置 JSON"></textarea><p id="cfMessage" class="message"></p></div><div class="card"><div class="card-head"><div><h3>当前请求环境</h3><button id="loadRuntimeBtn" class="btn btn-quiet">读取环境信息</button></div></div><pre id="runtimeInfo" class="output">尚未读取</pre></div></div>
+        <div id="telegramPage" class="page hidden"><div class="card"><div class="card-head"><div><h3>Telegram 通知</h3><p class="muted">保存机器人 Token 和 Chat ID。内容只在当前页面编辑。</p></div><button id="loadTgBtn" class="btn btn-quiet">读取配置</button></div><label for="tgBotToken">Bot Token</label><input id="tgBotToken" type="password" placeholder="输入 Telegram Bot Token"><label for="tgChatId">Chat ID</label><input id="tgChatId" placeholder="例如 123456789"><div class="form-actions"><button id="saveTgBtn" class="btn btn-primary">保存通知配置</button><button id="clearTgBtn" class="btn btn-danger">清空通知配置</button></div><p id="tgMessage" class="message"></p><p class="muted small">如果内核 API 不返回已有 Token，本页面不会尝试从日志或其他位置猜测。</p></div></div>
+        <div id="ipsPage" class="page hidden"><div class="card"><div class="card-head"><div><h3>自定义优选 IP</h3><button id="loadIpsBtn" class="btn btn-quiet">读取现有内容</button></div></div><label for="ipsEditor">IP 列表</label><textarea id="ipsEditor" rows="12" placeholder="每行一个 IP 或内核支持的条目"></textarea><div class="form-actions"><button id="saveIpsBtn" class="btn btn-primary">保存 IP 列表</button></div><p id="ipsMessage" class="message"></p></div></div>
+        <div id="logsPage" class="page hidden"><div class="card"><div class="card-head"><div><h3>运行日志</h3><p class="muted">显示内核 KV 中保存的 log.json。</p></div><button id="loadLogsBtn" class="btn btn-primary">刷新日志</button></div><div id="logsSummary" class="muted small">尚未加载</div><div class="table-wrap"><table><thead><tr><th>时间</th><th>类型</th><th>IP</th><th>位置</th><th>请求路径</th></tr></thead><tbody id="logsBody"><tr><td colspan="5" class="empty">点击刷新日志</td></tr></tbody></table></div></div></div>
+        <div id="toolsPage" class="page hidden"><div class="card"><div class="card-head"><div><h3>代理检测</h3><p class="muted">调用原内核的 admin/check 接口。</p></div></div><label for="proxyInput">代理地址</label><input id="proxyInput" placeholder="粘贴内核支持的代理地址"><button id="checkProxyBtn" class="btn btn-primary">开始检测</button><pre id="proxyResult" class="output">检测结果会显示在这里</pre><p id="proxyMessage" class="message"></p></div><div class="card"><div class="card-head"><div><h3>Cloudflare 用量</h3><p class="muted">需要提供对应的 Cloudflare API 凭据；不要在公共设备上使用。</p></div></div><div class="form-grid"><div><label for="cfEmail">账户邮箱</label><input id="cfEmail" type="email"></div><div><label for="cfAccount">Account ID</label><input id="cfAccount"></div><div><label for="cfGlobalKey">Global API Key</label><input id="cfGlobalKey" type="password"></div><div><label for="cfApiToken">API Token</label><input id="cfApiToken" type="password"></div></div><button id="usageBtn" class="btn btn-primary">查询用量</button><pre id="usageResult" class="output">查询结果会显示在这里</pre></div></div>
+      </section>
+      <footer>EdgeTunnel Panel · 独立面板项目 · 配置仍由原内核处理</footer>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body></html>
